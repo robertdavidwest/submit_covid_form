@@ -15,6 +15,16 @@ POST_URL = 'https://bachfeedbackv2.typeform.com/forms/cDTteMfM/complete-submissi
 BAD_COMMAND_RESPONSE = 'I did not understand your request. Please try again'
 BAD_USER_RESPONSE = 'I do not recognise this user. Please try again'
 
+
+def get_complement():
+    url = 'https://complimentr.com/api'
+    r = requests.get(url)
+    if r.status_code == 200:
+        return i.json()['compliment']
+    else:
+        return ''
+
+
 def get_post_data(name, email):
     data_template = json.load(open('data_template.json', 'r'))
     for item in data_template['answers']:
@@ -51,6 +61,10 @@ def run_bac_job(username):
         return
     u = users[0]
     msg = submit_form(u['name'], u['email']),
+
+    if u['username'] == 'sarah':
+        msg += '\n'
+        msg += get_compliment()
     send_text(msg, u['phone'])
 
 
