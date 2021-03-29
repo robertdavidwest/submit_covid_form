@@ -16,12 +16,15 @@ POST_URL = 'https://bachfeedbackv2.typeform.com/forms/cDTteMfM/complete-submissi
 BAD_COMMAND_RESPONSE = 'I did not understand your request. Please try again'
 BAD_USER_RESPONSE = 'I do not recognise this user. Please try again'
 
+COVID_FORM_SUCCESS_MSG = "Successfully completed covid form submission"
+COVID_FORM_FAIL_MSG = "Form submission was not successful"
 
-def get_complement():
+
+def get_compliment():
     url = 'https://complimentr.com/api'
     r = requests.get(url)
     if r.status_code == 200:
-        return i.json()['compliment']
+        return r.json()['compliment']
     else:
         return ''
 
@@ -49,15 +52,19 @@ def get_post_data(name, email):
     return data_template
 
 
-def submit_form(name, email):
+def submit_form(name, email, test):
+    if test:
+        return 'TEST::' + COVID_FORM_SUCCESS_MSG
+
     data = get_post_data(name, email)
     headers = {
             'content-Type': 'application/json'}
     r = requests.post(POST_URL, json=data, headers=headers)
     if (r.status_code == 200 ) & (r.json().get('type')=='completed'):
-        return "Successfully completed covid form submission"
+        return COVID_FORM_SUCCESS_MSG
     else:
-        return "Form submission was not successful"
+        return COVID_FORM_FAIL_MSG
+    
 
 
 def send_text(msg, to):
@@ -69,8 +76,8 @@ def send_text(msg, to):
         body=msg)
 
 
-def run_bac_job(u):
-    msg = submit_form(u['name'], u['email']),
+def run_bac_job(u, test):
+    msg = submit_form(u['name'], u['email'], test)
 
     if u['username'] == 'sarah':
         msg += '\n'
@@ -100,6 +107,12 @@ def incoming_sms():
         username = words[1]
     else:
         username = None
+    
+    if len(words) > 2:
+        if words[2]=='test':
+            test = True
+        else:
+            test = False
 
     # Start our TwiML response
     resp = MessagingResponse()
@@ -112,7 +125,7 @@ def incoming_sms():
     elif not user_config:
         resp.message(BAD_USER_RESPONSE)
     else:
-        run_bac_job(user_config)
+        run_bac_job(user_config, test)
 
     return str(resp)
 
