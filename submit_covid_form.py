@@ -12,6 +12,8 @@ EMAIL_ID = 'uRQDBI5qGoQH'
 GET_URL = 'https://bachfeedbackv2.typeform.com/to/cDTteMfM'
 POST_URL = 'https://bachfeedbackv2.typeform.com/forms/cDTteMfM/complete-submission'
 
+BAD_COMMAND_RESPONSE = 'I did not understand your request. Please try again'
+BAD_USER_RESPONSE = 'I do not recognise this user. Please try again'
 
 def get_post_data(name, email):
     data_template = json.load(open('data_template.json', 'r'))
@@ -43,29 +45,45 @@ def send_text(msg, to):
         body=msg)
 
 
-def main():
-    name = users[0]['name']
-    email = users[0]['email']
-    to = users[0]['phone']
-    send_text(
-        submit_form(name, email),
-        to=to)
+def run_bac_job(username):
+    users = [x for x in users if x['username']==username]
+    if len(users) != 1:
+        return
+    u = users[0]
+    msg = submit_form(u['name'], u['email']),
+    send_text(msg, u['phone'])
 
-'''
+
 app = Flask(__name__)
 
+
 @app.route("/sms", methods=['GET', 'POST'])
-def sms_reply():
-    """Respond to incoming calls with a simple text message."""
+def incoming_sms():
+    """Send a dynamic reply to an incoming text message"""
+
+    # Get the message the user sent our Twilio number
+    body = request.values.get('Body', None)
+    words = bodys.split(' ')
+    job = words[0]
+    if len(words) > 1:
+        username = words[1]
+    else:
+        username = None
+
     # Start our TwiML response
     resp = MessagingResponse()
 
-    # Add a message
-    resp.message("The Robots are coming! Head for the hills!")
+    # submit form for permitted users
+    if job != 'bac':
+        resp.message(BAD_COMMAND_RESPONSE)
+    elif username !='robert':
+        resp.message(BAD_USER_RESPONSE)
+    else:
+        run_bac_job(username)
+
 
     return str(resp)
-'''
+
 
 if __name__ == "__main__":
     app.run(debug=True)
-    main()
