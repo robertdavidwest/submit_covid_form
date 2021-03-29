@@ -3,7 +3,9 @@
 Send simple text message command to submit covid form for gym so I don't have to fill it out every time I go.
 
 
-### private_config.py setup to run main.py
+### private_config.py setup to run the app
+
+Add your twilio credentials here and a list of pre approved users who can use the app.
 
 ```
 TWILIO_CONFIG = {
