@@ -113,6 +113,8 @@ def incoming_sms():
             test = True
         else:
             test = False
+    else:
+        test = False
 
     # Start our TwiML response
     resp = MessagingResponse()
